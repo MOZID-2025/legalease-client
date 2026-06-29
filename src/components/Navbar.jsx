@@ -5,6 +5,7 @@ import { Menu, X, Search, LogOut, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
+import Logo from "./Logo";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export default function Navbar() {
 
   const navItems = [
     { name: "Home", href: "/" },
-    { name: "Browse Lawyers", href: "/browse-lawyers" },
+    { name: "Browse Lawyers", href: "/lawyers" },
   ];
 
   const handleLogout = async () => {
@@ -49,11 +50,7 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
-          <Link href="/">
-            <h1 className="text-3xl font-extrabold text-white">
-              Legal<span className="text-amber-400">Ease</span>
-            </h1>
-          </Link>
+          <Logo />
 
           {/* Desktop Nav */}
           <div className="hidden items-center gap-8 lg:flex">
