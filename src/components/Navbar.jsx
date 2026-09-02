@@ -21,7 +21,7 @@ export default function Navbar() {
 
   const navItems = [
     { name: "Home", href: "/" },
-    { name: "Browse Lawyers", href: "/lawyers" },
+    { name: "Browse Lawyers", href: "/browse-lawyers" },
   ];
 
   const handleLogout = async () => {
