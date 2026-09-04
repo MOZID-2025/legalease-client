@@ -1,16 +1,16 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
-import { User, FileText, BriefcaseBusiness, ArrowRight } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
+import { Mail, ShieldCheck, Pencil } from "lucide-react";
 
 const ClientDashboard = () => {
   const { data: session, isPending } = useSession();
 
   if (isPending) {
     return (
-      <div className="flex h-[300px] items-center justify-center text-white">
-        Loading...
+      <div className="flex min-h-[300px] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
       </div>
     );
   }
@@ -20,90 +20,76 @@ const ClientDashboard = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="rounded-3xl bg-gradient-to-r from-indigo-900 via-slate-900 to-slate-950 p-8">
-        <h1 className="text-4xl font-bold text-white">
-          Welcome Back, {user?.name}
-        </h1>
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 px-6 py-10 shadow-2xl sm:px-10">
+        {/* Background Decoration */}
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-600/20 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-purple-600/10 blur-3xl" />
 
-        <p className="mt-3 max-w-2xl text-slate-300">
-          Manage your legal consultations, hiring requests, profile information,
-          and legal services from your personal dashboard.
-        </p>
-      </div>
-
-      {/* Profile Card */}
-      <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-6">
-        <div className="flex flex-col items-center gap-4 md:flex-row">
-          <img
-            src={user?.image || "https://i.pravatar.cc/150?img=12"}
-            alt="Profile"
-            className="h-24 w-24 rounded-full border-4 border-amber-400 object-cover"
-          />
-
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-white">{user?.name}</h2>
-
-            <p className="text-slate-400">{user?.email}</p>
+        <div className="relative">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300">
+            <ShieldCheck size={17} />
+            User Dashboard
           </div>
 
-          <Link
-            href="/dashboard/user/update-profile"
-            className="rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-5 py-3 font-semibold text-slate-900 transition hover:scale-105"
-          >
-            Update Profile
-          </Link>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            Welcome Back,
+            <span className="block bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
+              {user?.name || "User"}
+            </span>
+          </h1>
+
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+            Manage your legal consultations, hiring requests, profile
+            information, and legal services from your personal dashboard.
+          </p>
         </div>
-      </div>
+      </section>
 
-      {/* Quick Stats */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-6">
-          <BriefcaseBusiness size={32} className="mb-3 text-amber-400" />
+      {/* Profile Card */}
+      <section className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900/95 to-indigo-950/40 shadow-xl">
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col items-center gap-6 sm:flex-row">
+            {/* Profile Image */}
+            <div className="relative">
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-amber-400 to-indigo-500 opacity-70 blur-sm" />
 
-          <h3 className="text-3xl font-bold text-white">5</h3>
+              <img
+                src={user?.image || "https://i.pravatar.cc/150?img=12"}
+                alt={user?.name || "Profile"}
+                className="relative h-24 w-24 rounded-full border-4 border-slate-900 object-cover shadow-lg sm:h-28 sm:w-28"
+              />
 
-          <p className="text-slate-400">Total Hiring Requests</p>
+              {/* Online indicator */}
+              <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-4 border-slate-900 bg-emerald-500" />
+            </div>
+
+            {/* User Info */}
+            <div className="flex-1 text-center sm:text-left">
+              <p className="mb-1 text-sm font-medium text-indigo-400">
+                Profile Information
+              </p>
+
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">
+                {user?.name || "User"}
+              </h2>
+
+              <div className="mt-2 flex items-center justify-center gap-2 text-sm text-slate-400 sm:justify-start">
+                <Mail size={16} className="text-slate-500" />
+                <span>{user?.email || "No email available"}</span>
+              </div>
+            </div>
+
+            {/* Edit Profile Button */}
+            <Link
+              href="/dashboard/client/update-profile"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-5 py-3 text-sm font-bold text-slate-900 shadow-lg shadow-amber-500/10 transition duration-300 hover:scale-105 hover:shadow-amber-500/20"
+            >
+              <Pencil size={17} />
+              Edit Profile
+            </Link>
+          </div>
         </div>
-
-        <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-6">
-          <FileText size={32} className="mb-3 text-green-400" />
-
-          <h3 className="text-3xl font-bold text-white">2</h3>
-
-          <p className="text-slate-400">Accepted Requests</p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-6">
-          <User size={32} className="mb-3 text-blue-400" />
-
-          <h3 className="text-3xl font-bold text-white">Active</h3>
-
-          <p className="text-slate-400">Account Status</p>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-6">
-        <h2 className="mb-5 text-2xl font-bold text-white">Quick Actions</h2>
-
-        <div className="flex flex-wrap gap-4">
-          <Link
-            href="/dashboard/user/hiring-history"
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-5 py-3 font-semibold text-slate-900"
-          >
-            Hiring History
-            <ArrowRight size={18} />
-          </Link>
-
-          <Link
-            href="/dashboard/user/update-profile"
-            className="flex items-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-white hover:bg-white/5"
-          >
-            Update Profile
-            <ArrowRight size={18} />
-          </Link>
-        </div>
-      </div>
+      </section>
     </div>
   );
 };

@@ -2,14 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import { Eye, EyeOff, Mail, Lock, Scale } from "lucide-react";
+
 import { signIn } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // form state
+  // Get callback URL
+  const callbackUrl = searchParams.get("callbackUrl");
+
+  // Form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -30,10 +36,28 @@ export default function LoginPage() {
         password,
       });
 
+      // Authentication error
       if (authError) {
         setError(authError.message || "Login failed");
         return;
       }
+
+      // ==========================================
+      // CALLBACK REDIRECT
+      // ==========================================
+
+      if (
+        callbackUrl &&
+        callbackUrl.startsWith("/") &&
+        !callbackUrl.startsWith("//")
+      ) {
+        router.push(callbackUrl);
+        return;
+      }
+
+      // ==========================================
+      // NORMAL ROLE BASED REDIRECT
+      // ==========================================
 
       const role = data?.user?.role;
 
@@ -45,6 +69,8 @@ export default function LoginPage() {
         router.push("/");
       }
     } catch (err) {
+      console.error(err);
+
       setError("Something went wrong. Try again.");
     } finally {
       setLoading(false);
@@ -57,9 +83,12 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="mb-6 text-center">
           <Scale className="mx-auto mb-3 text-amber-400" size={44} />
+
           <h1 className="text-3xl font-bold text-white">
-            Legal<span className="text-amber-400">Ease</span>
+            Legal
+            <span className="text-amber-400">Ease</span>
           </h1>
+
           <p className="mt-1 text-sm text-slate-400">
             Login to access your dashboard
           </p>
@@ -130,6 +159,7 @@ export default function LoginPage() {
 
           {/* Login Button */}
           <button
+            type="submit"
             disabled={loading}
             className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 py-3 font-semibold text-slate-900 transition hover:scale-[1.02] disabled:opacity-50"
           >
@@ -139,11 +169,13 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-white/10" />
+
             <span className="text-xs text-slate-500">OR</span>
+
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
-          {/* Google Login (placeholder) */}
+          {/* Google Login */}
           <button
             type="button"
             className="w-full rounded-xl border border-white/10 bg-white/5 py-3 text-white transition hover:bg-white/10"
@@ -151,7 +183,7 @@ export default function LoginPage() {
             Continue with Google
           </button>
 
-          {/* Signup link */}
+          {/* Signup */}
           <p className="text-center text-sm text-slate-400">
             Don’t have an account?{" "}
             <Link href="/signup" className="text-amber-400 hover:underline">

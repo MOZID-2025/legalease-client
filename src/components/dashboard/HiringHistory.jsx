@@ -1,119 +1,212 @@
 "use client";
 
-const hiringData = [
-  {
-    id: 1,
-    lawyerName: "Sarah Ahmed",
-    specialization: "Corporate Law",
-    fee: 5000,
-    hiringDate: "2026-06-15",
-    status: "pending",
-  },
-  {
-    id: 2,
-    lawyerName: "David Smith",
-    specialization: "Criminal Law",
-    fee: 8000,
-    hiringDate: "2026-06-12",
-    status: "accepted",
-  },
-  {
-    id: 3,
-    lawyerName: "Emma Wilson",
-    specialization: "Family Law",
-    fee: 4000,
-    hiringDate: "2026-06-10",
-    status: "rejected",
-  },
-];
+import { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
+import {
+  BriefcaseBusiness,
+  CalendarDays,
+  Clock3,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 
-export default function HiringHistory() {
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "accepted":
-        return "bg-green-500/20 text-green-400";
-      case "rejected":
-        return "bg-red-500/20 text-red-400";
-      default:
-        return "bg-yellow-500/20 text-yellow-400";
-    }
-  };
+const HiringHistory = () => {
+  const { data: session, isPending } = useSession();
+
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  useEffect(() => {
+    if (!session?.user?.email) return;
+
+    const fetchHiringHistory = async () => {
+      try {
+        const res = await fetch(
+          `${API_URL}/hiring-requests/user/${encodeURIComponent(
+            session.user.email,
+          )}`,
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch hiring history");
+        }
+
+        const data = await res.json();
+        setRequests(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHiringHistory();
+  }, [session?.user?.email]);
+
+  if (isPending || loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full rounded-2xl border border-white/10 bg-slate-900/40 p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white">Hiring History</h1>
+    <div className="space-y-8">
+      {/* Header */}
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 px-6 py-10 shadow-2xl sm:px-10">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-600/20 blur-3xl" />
 
-        <p className="mt-2 text-slate-400">
-          Track all your lawyer hiring requests.
-        </p>
-      </div>
+        <div className="relative">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300">
+            <BriefcaseBusiness size={17} />
+            Hiring Management
+          </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full ">
-          <thead>
-            <tr className="border-b border-white/10 text-left">
-              <th className="px-4 py-4 text-slate-300">Lawyer</th>
-              <th className="px-4 py-4 text-slate-300">Specialisation</th>
-              <th className="px-4 py-4 text-slate-300">Fee</th>
-              <th className="px-4 py-4 text-slate-300">Hiring Date</th>
-              <th className="px-4 py-4 text-slate-300">Status</th>
-              <th className="px-4 py-4 text-slate-300">Action</th>
-            </tr>
-          </thead>
+          <h1 className="text-3xl font-extrabold text-white sm:text-4xl">
+            Hiring History
+          </h1>
 
-          <tbody>
-            {hiringData.map((item) => (
-              <tr
-                key={item.id}
-                className="border-b border-white/5 hover:bg-white/5"
-              >
-                <td className="px-4 py-4 text-white">{item.lawyerName}</td>
+          <p className="mt-3 text-sm leading-7 text-slate-400 sm:text-base">
+            Track your lawyer hiring requests and their current status.
+          </p>
+        </div>
+      </section>
 
-                <td className="px-4 py-4 text-slate-300">
-                  {item.specialization}
-                </td>
+      {/* Empty */}
+      {requests.length === 0 ? (
+        <div className="rounded-3xl border border-white/10 bg-slate-900/50 px-6 py-16 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/10">
+            <BriefcaseBusiness size={30} className="text-indigo-400" />
+          </div>
 
-                <td className="px-4 py-4 text-slate-300">৳{item.fee}</td>
+          <h2 className="mt-5 text-xl font-bold text-white">
+            No Hiring Requests
+          </h2>
 
-                <td className="px-4 py-4 text-slate-300">{item.hiringDate}</td>
+          <p className="mt-2 text-sm text-slate-400">
+            Your lawyer hiring requests will appear here.
+          </p>
+        </div>
+      ) : (
+        /* Table */
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 shadow-xl">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[800px]">
+              <thead className="border-b border-white/10 bg-white/5">
+                <tr>
+                  <th className="px-6 py-5 text-left text-sm font-semibold text-slate-300">
+                    Lawyer
+                  </th>
 
-                <td className="px-4 py-4">
-                  <span
-                    className={`rounded-full px-3 py-1 text-sm font-medium capitalize ${getStatusStyle(
-                      item.status,
-                    )}`}
+                  <th className="px-6 py-5 text-left text-sm font-semibold text-slate-300">
+                    Specialisation
+                  </th>
+
+                  <th className="px-6 py-5 text-left text-sm font-semibold text-slate-300">
+                    Fee
+                  </th>
+
+                  <th className="px-6 py-5 text-left text-sm font-semibold text-slate-300">
+                    Hiring Date
+                  </th>
+
+                  <th className="px-6 py-5 text-left text-sm font-semibold text-slate-300">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-white/5">
+                {requests.map((request) => (
+                  <tr
+                    key={request._id}
+                    className="transition hover:bg-white/[0.03]"
                   >
-                    {item.status}
-                  </span>
-                </td>
+                    {/* Lawyer */}
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10">
+                          <BriefcaseBusiness
+                            size={18}
+                            className="text-indigo-400"
+                          />
+                        </div>
 
-                <td className="px-4 py-4">
-                  {item.status === "accepted" ? (
-                    <button className="rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2 font-medium text-slate-900">
-                      Pay Now
-                    </button>
-                  ) : item.status === "rejected" ? (
-                    <button
-                      disabled
-                      className="cursor-not-allowed rounded-lg bg-red-500/20 px-4 py-2 text-red-400"
-                    >
-                      Rejected
-                    </button>
-                  ) : (
-                    <button
-                      disabled
-                      className="cursor-not-allowed rounded-lg bg-yellow-500/20 px-4 py-2 text-yellow-400"
-                    >
-                      Waiting...
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                        <span className="font-semibold text-white">
+                          {request.lawyerName}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Specialization */}
+                    <td className="px-6 py-5 text-sm text-slate-400">
+                      {request.specialization}
+                    </td>
+
+                    {/* Fee */}
+                    <td className="px-6 py-5 font-semibold text-amber-400">
+                      ৳{request.fee}
+                    </td>
+
+                    {/* Date */}
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2 text-sm text-slate-400">
+                        <CalendarDays size={16} />
+
+                        {new Date(request.hiringDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          },
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-6 py-5">
+                      <StatusBadge status={request.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+const StatusBadge = ({ status }) => {
+  if (status === "accepted") {
+    return (
+      <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold capitalize text-emerald-400">
+        <CheckCircle size={15} />
+        Accepted
+      </span>
+    );
+  }
+
+  if (status === "rejected") {
+    return (
+      <span className="inline-flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-1.5 text-xs font-semibold capitalize text-red-400">
+        <XCircle size={15} />
+        Rejected
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold capitalize text-amber-400">
+      <Clock3 size={15} />
+      Pending
+    </span>
+  );
+};
+
+export default HiringHistory;

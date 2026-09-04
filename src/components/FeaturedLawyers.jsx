@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Star, MapPin, BriefcaseBusiness } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
 
 const container = {
   hidden: {},
@@ -29,6 +31,9 @@ export default function FeaturedLawyers() {
   const [lawyers, setLawyers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -52,6 +57,17 @@ export default function FeaturedLawyers() {
 
     fetchFeaturedLawyers();
   }, [API_URL]);
+
+  const handleViewProfile = (id) => {
+    const detailsUrl = `/lawyers/${id}`;
+
+    if (!session?.user) {
+      router.push(`/signin?callbackUrl=${encodeURIComponent(detailsUrl)}`);
+      return;
+    }
+
+    router.push(detailsUrl);
+  };
 
   return (
     <section className="bg-slate-950 py-20">
@@ -174,12 +190,13 @@ export default function FeaturedLawyers() {
                   )}
 
                   {/* Button */}
-                  <Link
-                    href={`/lawyers/${lawyer._id}`}
+                  <button
+                    onClick={() => handleViewProfile(lawyer._id)}
+                    disabled={isPending}
                     className="mt-6 inline-block w-full rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 py-3 text-center font-semibold text-slate-900 transition hover:scale-[1.02]"
                   >
                     View Profile
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             ))}

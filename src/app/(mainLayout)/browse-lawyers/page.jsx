@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
+
 import {
   Search,
   SlidersHorizontal,
@@ -16,9 +19,11 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 6;
 
 const BrowseLawyers = () => {
+  const router = useRouter();
+  const { data: session } = useSession();
   const [lawyers, setLawyers] = useState([]);
   const [search, setSearch] = useState("");
   const [specialization, setSpecialization] = useState("All");
@@ -32,6 +37,17 @@ const BrowseLawyers = () => {
   const [error, setError] = useState("");
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const handleViewProfile = (id) => {
+    const profileUrl = `/lawyers/${id}`;
+
+    if (!session?.user) {
+      router.push(`/signin?callbackUrl=${encodeURIComponent(profileUrl)}`);
+      return;
+    }
+
+    router.push(profileUrl);
+  };
 
   // ==========================================
   // Fetch Lawyers
@@ -273,7 +289,7 @@ const BrowseLawyers = () => {
       {/* ==========================================
           Search & Filters
       ========================================== */}
-      <section className="sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+      <section className="sticky top-0 z-30 border-b backdrop-blur">
         <div className="mx-auto max-w-7xl px-6 py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             {/* Search */}
@@ -288,7 +304,7 @@ const BrowseLawyers = () => {
                 placeholder="Search by lawyer name or specialization..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-12 w-full rounded-xl border  pl-12 pr-4 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                className="h-12 w-full rounded-xl border  pl-12 pr-4 text-black outline-none transition focus:border-indigo-500 focus:ring-2"
               />
             </div>
 
@@ -491,12 +507,12 @@ const BrowseLawyers = () => {
                         </p>
                       </div>
 
-                      <Link
-                        href={`/lawyers/${lawyer._id}`}
-                        className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-600 sm:px-4 sm:text-sm"
+                      <button
+                        onClick={() => handleViewProfile(lawyer._id)}
+                        className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-amber-400 sm:px-4 sm:text-sm hover:text-black"
                       >
                         View Profile
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </motion.div>
