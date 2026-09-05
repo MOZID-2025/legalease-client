@@ -1,25 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Eye, EyeOff, Mail, Lock, Scale } from "lucide-react";
-
 import { signIn } from "@/lib/auth-client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get callback URL
   const callbackUrl = searchParams.get("callbackUrl");
 
-  // Form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // UI state
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,16 +32,12 @@ export default function LoginPage() {
         password,
       });
 
-      // Authentication error
       if (authError) {
         setError(authError.message || "Login failed");
         return;
       }
 
-      // ==========================================
-      // CALLBACK REDIRECT
-      // ==========================================
-
+      // Callback URL redirect
       if (
         callbackUrl &&
         callbackUrl.startsWith("/") &&
@@ -55,10 +47,7 @@ export default function LoginPage() {
         return;
       }
 
-      // ==========================================
-      // NORMAL ROLE BASED REDIRECT
-      // ==========================================
-
+      // Role based redirect
       const role = data?.user?.role;
 
       if (role === "admin") {
@@ -70,7 +59,6 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error(err);
-
       setError("Something went wrong. Try again.");
     } finally {
       setLoading(false);
@@ -101,7 +89,6 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-5">
           {/* Email */}
           <div>
@@ -193,5 +180,19 @@ export default function LoginPage() {
         </form>
       </div>
     </section>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950">
+          <div className="text-lg text-amber-400">Loading...</div>
+        </section>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

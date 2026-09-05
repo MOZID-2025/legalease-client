@@ -209,20 +209,32 @@ const HiringHistory = () => {
                     <td className="px-6 py-5">
                       {request.status === "accepted" &&
                         request.paymentStatus !== "paid" && (
-                          <button
-                            onClick={() => handlePayment(request._id)}
-                            disabled={payingId === request._id}
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2.5 text-sm font-bold text-slate-900 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {payingId === request._id ? (
-                              <>
-                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
-                                Processing...
-                              </>
-                            ) : (
-                              <>Pay Now</>
-                            )}
-                          </button>
+                          // <button
+                          //   onClick={() => handlePayment(request._id)}
+                          //   disabled={payingId === request._id}
+                          //   className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2.5 text-sm font-bold text-slate-900 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
+                          // >
+                          //   {payingId === request._id ? (
+                          //     <>
+                          //       <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
+                          //       Processing...
+                          //     </>
+                          //   ) : (
+                          //     <>Pay Now</>
+                          //   )}
+                          // </button>
+
+                          <form action="/api/checkout_sessions" method="POST">
+                            <section>
+                              <button
+                                type="submit"
+                                role="link"
+                                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2.5 text-sm font-bold text-slate-900 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Pay now
+                              </button>
+                            </section>
+                          </form>
                         )}
 
                       {request.paymentStatus === "paid" && (
