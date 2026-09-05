@@ -62,9 +62,9 @@ export default function LoginPage() {
       const role = data?.user?.role;
 
       if (role === "admin") {
-        router.push("/dashboard/admin/analytics");
+        router.push("/dashboard/admin/manage-users");
       } else if (role === "lawyer") {
-        router.push("/dashboard/lawyer/hiring-history");
+        router.push("/");
       } else {
         router.push("/");
       }

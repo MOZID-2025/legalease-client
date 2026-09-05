@@ -48,11 +48,15 @@ const LawyerDetails = () => {
 
         lawyerId: lawyer._id,
         lawyerName: lawyer.name,
+        lawyerEmail: lawyer.email,
+
         specialization: lawyer.specialization,
-        fee: lawyer.fee,
+        fee: Number(lawyer.fee),
 
         hiringDate: new Date(),
+
         status: "pending",
+        paymentStatus: "unpaid",
       };
 
       const res = await fetch(`${API_URL}/hiring-requests`, {

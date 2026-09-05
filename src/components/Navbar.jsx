@@ -105,7 +105,7 @@ export default function Navbar() {
     }
 
     if (user?.role === "admin") {
-      return "/dashboard/admin/profile";
+      return "/dashboard/admin/manage-users";
     }
 
     return "/dashboard/client/update-profile";

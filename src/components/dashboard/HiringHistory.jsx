@@ -13,11 +13,42 @@ import {
 const HiringHistory = () => {
   const { data: session, isPending } = useSession();
 
+  const [payingId, setPayingId] = useState(null);
+
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+  const handlePayment = async (requestId) => {
+    try {
+      setPayingId(requestId);
+
+      const res = await fetch(`${API_URL}/create-checkout-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          hiringRequestId: requestId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to start payment");
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "Payment failed");
+    } finally {
+      setPayingId(null);
+    }
+  };
   useEffect(() => {
     if (!session?.user?.email) return;
 
@@ -94,7 +125,7 @@ const HiringHistory = () => {
         /* Table */
         <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px]">
+            <table className="w-full min-w-[950px]">
               <thead className="border-b border-white/10 bg-white/5">
                 <tr>
                   <th className="px-6 py-5 text-left text-sm font-semibold text-slate-300">
@@ -115,6 +146,9 @@ const HiringHistory = () => {
 
                   <th className="px-6 py-5 text-left text-sm font-semibold text-slate-300">
                     Status
+                  </th>
+                  <th className="px-6 py-5 text-left text-sm font-semibold text-slate-300">
+                    Action
                   </th>
                 </tr>
               </thead>
@@ -170,6 +204,33 @@ const HiringHistory = () => {
                     {/* Status */}
                     <td className="px-6 py-5">
                       <StatusBadge status={request.status} />
+                    </td>
+
+                    <td className="px-6 py-5">
+                      {request.status === "accepted" &&
+                        request.paymentStatus !== "paid" && (
+                          <button
+                            onClick={() => handlePayment(request._id)}
+                            disabled={payingId === request._id}
+                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2.5 text-sm font-bold text-slate-900 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {payingId === request._id ? (
+                              <>
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>Pay Now</>
+                            )}
+                          </button>
+                        )}
+
+                      {request.paymentStatus === "paid" && (
+                        <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-400">
+                          <CheckCircle size={16} />
+                          Paid
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
